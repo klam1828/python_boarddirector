@@ -1,1 +1,0 @@
-python manage.py test -v 2 accounts billing boardcalendar committees common dashboard documents meetings news permissions profiles registration rsvp voting
