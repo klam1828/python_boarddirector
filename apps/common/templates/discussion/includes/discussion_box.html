@@ -1,0 +1,51 @@
+{% load i18n common_tags user_tags permissions_tags %}
+<div id="discussion-page">
+    <div class="discussion-box">
+        <div class="discussion-box-form">
+            <form action="{% acc_url 'discussion:add' %}" id="discussion-form" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="feed_name" id="feed_name">
+                <div class="fields">
+                    <div class="c1">
+                        <ul id="main_form_discussion">
+                            <li class="icon_main_form_discussion">
+                                <div class="upload_images_for_message"><span class="count_upload"></span> <i
+                                        class="fa fa-paperclip" aria-hidden="true"></i></div>
+                            </li>
+                            <li class="icon_main_form_discussion">
+                                <div class="emojis_for_message">
+                                    <i class="fa fa-smile-o" aria-hidden="true"></i>
+                                </div>
+                            </li>
+                            <li class="textarea_main_form_discussion">
+                                <textarea name="message" id="id_message" required rows="1"
+                                          placeholder="{% trans ' Write your message...' %}"
+                                          class="txt default k-textbox feed-mention" data-emojiable="true"></textarea>
+                            </li>
+                            <li class="button_main_form_discussion">
+                                <button type="submit" class="btn btn-edit">{% trans 'Share' %}</button>
+                            </li>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="discussion-box-window">
+        </div>
+    </div>
+</div>
+
+<div id="window-attach-files">
+    <div>
+        <form method="post" enctype="multipart/form-data" class="createmeeting-form create-document-form"
+              action="{% acc_url 'folders:document_add' slug=folder.slug %}">
+            {% csrf_token %}
+            <ul>
+                {% include 'meetings/includes/edit_form.html' with form=folder_add_form %}
+            </ul>
+            <input type="submit" class="btn" value="{% trans 'Attach' %}">
+            <div class="btn back">{% trans 'Close' %}</div>
+        </form>
+    </div>
+</div>

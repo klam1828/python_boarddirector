@@ -1,0 +1,30 @@
+{% load i18n common_tags %}
+{# Sharing #}
+
+<form id="share-folder-form"
+    class="folder-form"
+    action="{% acc_url 'folders:share_add' slug=folder.slug %}{% if document %}?document_id={{ document.id }}{% endif %}"
+    method="POST"
+    data-error-text="{% trans 'Sorry, you do not have permission to share' %} {{ object }}">
+  {% csrf_token %}
+  <div class="form-group">
+    <label for="id_share-role">{% trans "Invite Group of Collaborators" %}</label>
+    {{ form.role }}
+  </div>
+  <div class="form-group">
+    <label for="id_share-membership">{% trans "Invite Individual Collaborators" %}</label>
+    {{ form.memberships }}
+  </div>
+  <div class="form-group">
+    <label for="id_share-permission">{% trans "Permission" %}</label>
+    {{ form.permission }}
+  </div>
+  {% if document %}
+  <div class="form-group">
+    <div class="document-item-downloadable">
+      <input type="checkbox" name="share-downloadable" id="downloadable-checkbox" {% if document.downloadable %}checked{% endif %} >
+      <label for="downloadable-checkbox">{% trans 'Allow Document to be Downloaded' %}</label>
+    </div>
+  </div>
+  {% endif %}
+</form>

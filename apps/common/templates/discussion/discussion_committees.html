@@ -1,0 +1,92 @@
+{% extends "inner.html" %}
+{% load i18n static thumbnail common_tags user_tags permissions_tags %}
+
+{% block base_resources %}
+  <link rel="stylesheet" href="{% static 'css.generated/base.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/all.css' %}"/>
+  <script src="{% static 'js/libs/jquery-1.12.4/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css.generated/committees.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/jquery.mentionsInput.css' %}"/>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/underscore-min.js' %}"></script>
+  <script src="{% static 'js/kendo.web.min.js' %}"></script>
+  <script src="{% static 'js/jquery.mentionsInput.js' %}"></script>
+  <script src="{% static 'js/libs/momentjs/moment.js'|min_for_prod %}"></script>
+  <script src="{% static 'js/discussion.js' %}"></script>
+  <script src="{% static 'js/getstream.js' %}"></script>
+{% endblock extra_js %}
+
+{% block workspace %}
+  <ul class="breadcrumbs breadcrumbs-separator">
+    <li><a href="{% acc_url 'discussion:list' %}">{% trans 'Discussions' %}</a></li>
+    <li>{{ active_committee }}</li>
+  </ul>
+
+  <div class="content content-box">
+    <header class="heading">
+      <div class="holder">
+        <h2>
+          {% trans 'Discussion Committee' %} - {{ active_committee }}
+        </h2>
+      </div>
+    </header>
+
+    <div class="inner-menu" role="tablist">
+      <a href="#public_messagges" class="active">{% trans 'Public Messages' %}</a>
+      <a href="#private_messagges">{% trans 'Private Messages' %}</a>
+    </div>
+  </div>
+
+  <div class="sections section-tab" id="public_messagges">
+    {% include "discussion/includes/discussion_box.html" %}
+  </div>
+  <div class="sections section-tab" id="private_messagges">
+    {% for membership in active_committee.members %}
+      {% if current_membership.id != membership.id %}
+      <div class="member member-active" data-role="{{ membership.role }}"
+                                      data-chairman="{% if membership.chairman %}true{% else %}false{% endif %}"
+                                      data-invited="{% if membership.is_invited %}true{% else %}false{% endif %}">
+          <a class="photo" href="{{ membership.get_path_to_discussion_private }}">
+              <img alt="{{ membership.get_full_name }}"
+              {% if membership.avatar %}src="{{ membership|avatar:'140x140' }}"
+              {% else %}src="/static/images/default_avatar_sq.svg"{% endif %}
+              class="rounded" width="140" height="140">
+          </a>
+          <div class="text">
+            <ul class="contacts">
+              <li>
+                <i class="fa fa-comments" aria-hidden="true"></i>
+              </li>
+            </ul>
+            <h3 class="full-name" title="{{ membership.get_full_name }}">{{ membership.get_full_name }}</h3>
+            <h4>{{ membership.get_role_name }}</h4>
+            <dl>
+              <dt>{% trans 'Term Dates:' %}</dt>
+              <dd>{{ membership.term_start|date:"N j, Y" }} - {{ membership.term_expires|date:"N j, Y" }}</dd>
+            </dl>
+            <footer>
+              <a class="btn btn-primary" href="{{ membership.get_path_to_discussion_private }}">{% trans 'View Discussion' %}</a>
+            </footer>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <script type="text/javascript">
+    var api_discussion_get = "{% acc_url 'discussion:get' %}";
+    var member_id = null;
+    var feed_name = "{{ feed_discussion }}";
+    var getstream_token = "{{ user_feed_1.token }}";
+    var all_members = JSON.parse('{{ all_members  |safe }}');
+    var current_member_id = "{{current_membership.id}}";
+    var current_member_fullname = "{{current_membership.get_full_name}}";
+    var getstream_key = "{{getstream_key}}";
+    var getstream_app_id = "{{getstream_app_id}}";
+  </script>
+{% endblock workspace %}

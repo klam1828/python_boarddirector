@@ -1,0 +1,72 @@
+{% extends "inner.html" %}
+{% load i18n two_factor static common_tags %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'js/libs/intl-tel-input-master/css/intlTelInput.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/libs/intl-tel-input-master/js/intlTelInput.min.js' %}"></script>
+<script src="{% static 'js/libs/intl-tel-input-master/js/utils.js' %}"></script>
+{% endblock %}
+
+{% block workspace %}
+  <h1>{% block title %}{% trans "Add Backup Phone" %}{% endblock %}</h1>
+
+  <div class='fields tfa'>
+
+  <form action="" method="post">{% csrf_token %}
+      {# % include "two_factor/_wizard_forms.html" % #}
+      {{ wizard.management_form }}
+  {% if wizard.steps.current == 'setup' %}
+      <p>{% blocktrans %}You'll be adding a backup phone number to your
+        account. This number will be used if your primary method of
+        registration is not available.{% endblocktrans %}</p>
+        <ul class='tfa-fields-list'>
+            {# {{ wizard.form.as_ul }} #}
+              <li><label for="id_tel-number">Phone Number:</label>
+                <input type="text" name="tel-number" required id="id_tel-number" />
+                {% if wizard.form.errors.number %}
+                <p class='error'>{{ wizard.form.errors.number }}</p>
+                {% endif %}
+                  </li>
+              <input type="hidden" name="setup-method" value="sms" required id="id_setup-method_0" />
+          </ul>
+      
+  {% elif wizard.steps.current == 'validation' %}
+      <p>{% blocktrans %}We've sent a token to your phone number. Please
+        enter the token you've received.{% endblocktrans %}</p>
+        <ul class='tfa-fields-list'>
+            <li><label for="id_validation-token">Token:</label>
+              <input type="text" name="validation-token" required id="id_validation-token" pattern="[0-9]{4,6}" />
+            {% if wizard.form.errors.token %}
+            <p class='error'>{{ wizard.form.errors.token }}</p>
+            {% endif %}
+          </li>
+        </ul>
+  {% endif %}
+
+
+    {# hidden submit button to enable [enter] key #}
+    <div style="margin-left: -9999px"><input type="submit" value=""/></div>
+
+    {% if current_membership %}
+    <a href="{% url 'profiles:edit' pk=current_membership.pk %}" class="btn btn-gray btn-asize">{% trans "Cancel" %}</a>
+    {% endif %}
+
+    {% if wizard.steps.prev %}
+    <button name="wizard_goto_step" type="submit"
+            value="{{ wizard.steps.prev }}"
+            class="btn btn-gray btn-asize">{% trans "Back" %}</button>
+    {% endif %}
+  
+    <button type="submit" class="btn btn-asize btn-primary">{% trans "Next" %}</button>
+  
+  </form>
+</div>
+
+<script>
+    $("#id_tel-number").intlTelInput({hiddenInput: "setup-number"});
+</script>
+    
+{% endblock %}

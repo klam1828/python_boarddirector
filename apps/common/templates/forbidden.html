@@ -1,0 +1,21 @@
+{% extends "registration/base.html" %}
+{% load i18n %}
+{% block content %}
+<div id="main">
+<article class="content">
+<section class="block">
+  <h3>Sorry, you are not allowed to access this page.</h3>
+  {% if not reason %}
+    You don't have permission to access / on this server.
+  {% elif reason == 'social' %}
+    <p>Social logins were disabled by admin.</p>
+    <p>Please use your email and password to login.</p>
+    <p><a href='{% url "auth_logout" %}' class='btn'>Continue</a></p>
+  {% elif reason == '2fa' %}
+    <a href='{% url "auth_logout"' class='btn'>Continue</a>
+  {% endif %}
+</section>
+</article>
+</div>
+
+{% endblock %}

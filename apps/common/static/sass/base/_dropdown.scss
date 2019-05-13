@@ -1,0 +1,81 @@
+@import '../config';
+
+/*
+ul.folder-items li {
+  padding: 0px;
+  padding-top: 7px;
+  padding-bottom: 4px;
+}
+
+ul.folder-items li ul.inner li {
+  float: left;
+}
+*/
+
+div.innerlinks {
+  float: right;
+  position: relative;
+}
+
+/*
+ul.folder-items.ui-sortable li.ui-sortable-helper {
+  border-color: #cf7777;
+  background-color: rgba(255,255,220,0.85);
+  box-shadow: 4px 4px 10px #7e7e7e;
+}
+
+ul.folder-items.ui-sortable .ui-droppable-active {
+  filter: hue-rotate(-5deg);
+  background-color: rgba(255,255,220,0.85);
+}
+
+ul.folder-items.ui-sortable .ui-droppable-hover {
+  filter: saturate(175%);
+  z-index: 9999;
+}
+
+ul.folder-items > li {
+  @include clearfix();
+}
+
+ul.folder-items li ul.inner li {
+  background-color: transparent;
+  border-bottom: 0px;
+  padding: 15px 20px 18px 0;
+}
+*/
+
+div.innerlinks a:hover {
+  text-decoration: none;
+  color: $gray-dark;
+}
+
+div.innerlinks a {
+  font-size: 15px;
+  color: #787878;
+  padding-left: 20px;
+}
+
+div.dropdownlist {
+  display: none;
+  background-color: #fff;
+  position: absolute;
+  right: 10px;
+  padding: 5px;
+  border: 1px solid #c9c9c9;
+  z-index: 999;
+}
+
+div.dropdownlist a {
+  clear: both;
+  padding-left: 3px !important;
+  clear: both;
+  display: block;
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+/*
+ul.folder-items.has-search li ul.inner li.folder-items-name {
+  padding: 10px 20px 10px 0;
+}*/

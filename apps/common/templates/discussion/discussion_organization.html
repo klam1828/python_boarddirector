@@ -1,0 +1,237 @@
+{% extends "inner.html" %}
+{% load i18n static thumbnail common_tags user_tags permissions_tags %}
+
+{% block base_resources %}
+  <link rel="stylesheet" href="{% static 'css.generated/base.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/all.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/discussions.css' %}"/>
+  <script src="{% static 'js/libs/jquery-1.12.4/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css.generated/committees.css' %}"/>
+  <link rel="stylesheet" href="{% static 'css/jquery.mentionsInput.css' %}"/>
+
+  <link rel="stylesheet" type="text/css" href="{% static 'js/libs/jquery-emoji/css/jquery.emojipicker.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'js/libs/jquery-emoji/css/jquery.emojipicker.g.css' %}">
+
+  <link rel="stylesheet" href="{% static 'js/selectize/css/selectize.css' %}">
+  <link rel="stylesheet" href="{% static 'css/smoothness-jquery-ui.min.css' %}">
+  <link rel="stylesheet" href="{% static 'js/selectize/css/selectize.default.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/underscore-min.js' %}"></script>
+  <script src="{% static 'js/kendo.web.min.js' %}"></script>
+  <script src="{% static 'js/jquery.mentionsInput.js' %}"></script>
+  <script src="{% static 'js/libs/momentjs/moment.js'|min_for_prod %}"></script>
+  <script src="{% static 'js/discussion.js' %}"></script>
+  <script src="{% static 'js/getstream.js' %}"></script>
+
+  <script type="text/javascript" src="{% static 'js/libs/jquery-emoji/js/jquery.emojipicker.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/libs/jquery-emoji/js/jquery.emojis.js' %}"></script>
+
+  <script src="{% static 'js/selectize/js/standalone/selectize.js' %}"></script>
+{% endblock extra_js %}
+
+{% block content_class %}discussion-content-wrapper{% endblock content_class %}
+{% block article_class %}discussion-content{% endblock article_class %}
+{% block workspace %}
+
+<div id="discussion-left">
+  <div id="discussion-left-search">
+    <input type="text" placeholder="Search" id="search_discussion">
+  </div>
+  <div id="discussion-left-list">
+    <div class="discussion-left-list-item discussion-left-list-item-open">
+      <div class="discussion-left-list-item-name"><span>Open Discussions</span> <span class="discussion_channel_plus"><i class="fa fa-plus"></i></span></div>
+        <div class="discussion-left-list-item-discussion active" data-static="1" data-name="{{ account.id }}_organization" data-title="General Discussion"><span class="discussion-left-list-item-discussion-name">General Discussion</span></div>
+      {% for news_rooms in active_news_rooms %}
+        <div class="discussion-left-list-item-discussion" data-static="1" data-name="{{ account.id }}_news_{{ news_rooms.id }}" data-title="News - {{ news_rooms.title }}"><span class="discussion-left-list-item-discussion-name">{{ news_rooms.title }}</span></div>
+      {% endfor %}
+      {% for fd in not_auto_feed_discussion_public %}
+          <div class="discussion-left-list-item-discussion" data-name="{{ fd.slug }}" data-title="{{ fd.name }}">
+              <span class="discussion-left-list-item-discussion-name">{{ fd.name }}</span>
+              {% if fd.creator.id == current_membership.id %}
+                <span class="discussion-left-list-item-discussion-close" data-delete_url="{{ fd.get_url }}"><i class="fa fa-trash"></i></span>
+              {% endif %}
+          </div>
+      {% endfor %}
+    </div>
+    <div class="discussion-left-list-item discussion-left-list-item-private">
+      <div class="discussion-left-list-item-name"><span>Private Discussions</span> <span class="discussion_channel_plus" data-private="1"><i class="fa fa-plus"></i></span></div>
+      {% for committee_rooms in active_committee %}
+        <div class="discussion-left-list-item-discussion" data-static="1" data-name="{{ account.id }}_committees_{{ committee_rooms.id }}" data-private="1" data-title="Committee - {{ committee_rooms.name }}"><span class="discussion-left-list-item-discussion-name">{{ committee_rooms.name }}</span></div>
+      {% endfor %}
+      {% for fd in not_auto_feed_discussion_private %}
+        <div class="discussion-left-list-item-discussion" data-name="{{ fd.slug }}" data-title="{{ fd.name }}" data-private="1">
+            <span class="discussion-left-list-item-discussion-name">{{ fd.name }}</span>
+            {% if fd.creator.id == current_membership.id %}
+                  <span class="discussion-left-list-item-discussion-close" data-delete_url="{{ fd.get_url }}"><i class="fa fa-trash"></i></span>
+            {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="discussion-left-list-item">
+      <div class="discussion-left-list-item-name"><span>Direct Discussions</span></div>
+        {% for membership in all_members_objects %}
+            {% if membership.id != current_membership.id %}
+              <div class="discussion-left-list-item-discussion direct-discussions" data-title="Direct Discussions - {{ membership.get_full_name }}" data-name="{{ account.id }}_discussion_{% if membership.id < current_membership.id %}{{membership.id}}_{{current_membership.id}}{% else %}{{current_membership.id}}_{{membership.id}}{% endif %}">
+                  <div>
+                      <div class="photo" title="{{ membership.get_full_name }}" style="background-image: url({% if membership.avatar %}{{ membership|avatar:'140x140' }}{% else %}/static/images/default_avatar_sq.svg{% endif %});"></div>
+                      <span class="discussion-left-list-item-discussion-name">{{ membership.get_full_name }}</span>
+                  </div>
+              </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+  </div>
+</div>
+<div id="discussion-main">
+    <header class="heading">
+      <div class="holder">
+        <div class="show_info_channel">
+          <i class="fa fa-info-circle discussion-main-info-toggle" aria-hidden="true"></i>
+        </div>
+        <h2>
+          {% trans 'General Discussion' %}
+        </h2>
+        <div class="type_discussion"> (Open Forum)</div>
+      </div>
+    </header>
+
+  <div id="discussion-main-info-box">
+      <div id="discussion-main-box">
+        {% include "discussion/includes/discussion_box.html" %}
+      </div>
+      <div id="discussion-main-info">
+          <div class="discussion-main-info-header">
+              <div id="discussion-main-info-close" class="discussion-main-info-toggle">
+                  x
+              </div>
+              <h4>About Discussion</h4>
+          </div>
+          <div class="discussion-main-info-section">
+              <div class="discussion-main-info-section-title"><div>Discussion Details <a href="javascript:void(0);" class="editChannelInfo">edit</a></div><div><i class="fa fa-arrow-right"></i></div></div>
+              <div class="discussion-main-info-section-inner static">
+                  <div class="discussion-main-info-section-inner-details">
+                  </div>
+              </div>
+          </div>
+          <div class="discussion-main-info-section" data-load="members">
+              <div class="discussion-main-info-section-title"><div>Members</div><div><i class="fa fa-arrow-right"></i></div></div>
+              <div class="discussion-main-info-section-inner"></div>
+          </div>
+          <div class="discussion-main-info-section" data-load="files">
+              <div class="discussion-main-info-section-title"><div>Files</div><div><i class="fa fa-arrow-right"></i></div></div>
+              <div class="discussion-main-info-section-inner"></div>
+          </div>
+          <div class="discussion-main-info-section">
+              <div class="discussion-main-info-section-title"><div>Notification Settings</div><div><i class="fa fa-arrow-right"></i></div></div>
+              <div class="discussion-main-info-section-inner static">
+                  <div class="notification-configure">
+                      <p>
+                          When do you want your notifications from this Discussion?
+                      </p>
+                      <div>
+                          <input type="radio" name="notification-discussion-when" id="notification-discussion-when-mention">
+                          <label for="notification-discussion-when-mention">Only @mentions to you (default)</label>
+                      </div>
+                      <div>
+                          <input type="radio" name="notification-discussion-when" id="notification-discussion-when-all">
+                          <label for="notification-discussion-when-all">All new messages</label>
+                      </div>
+                      <div>
+                          <input type="radio" name="notification-discussion-when" id="notification-discussion-when-all-reply">
+                          <label for="notification-discussion-when-all-reply">All replies to you topics</label>
+                      </div>
+                      <div>
+                          <input type="radio" name="notification-discussion-when" id="notification-discussion-when-nothing">
+                          <label for="notification-discussion-when-nothing">Nothing</label>
+                      </div>
+                  </div>
+                  <div class="notification-configure">
+                      <div class="notification-configure-sent">
+                          <input type="checkbox" id="notification-discussion-email" class="checkboxArea"> <label for="notification-discussion-email">Email - once an hour</label>
+                          <p><i class="fa fa-info-circle" aria-hidden="true"></i> You'll only receive emails notifications when you're mentioned or sent a direct message.</p>
+                      </div>
+                      <div class="notification-configure-sent">
+                          <input type="checkbox" id="notification-discussion-mobile" class="checkboxArea"> <label for="notification-discussion-mobile">Mobile - once an hour</label>
+                          <p><i class="fa fa-info-circle" aria-hidden="true"></i> You'll only receive mobile notifications when you're mentioned or sent a direct message.</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <script type="text/javascript">
+    var api_discussion_get = "{% acc_url 'discussion:get' %}";
+    var api_discussion_search_channel = "{% acc_url 'discussion:search_channel' %}";
+    var api_discussion_main = "{% acc_url 'discussion:list' %}";
+    var account_id = "{{ account.id }}";
+    var account_url = "{{ account.url }}";
+    var member_id = "{{ active_member.id }}";
+    var feed_name = "{{ feed_discussion }}";
+    var feed_channels_token = "{{ feed_channels_token }}";
+    var all_members = JSON.parse('{{ all_members  |safe }}');
+    var current_member_is_admin = {% if current_membership.is_admin %}1{% else %}0{% endif %};
+    var current_member_id = "{{current_membership.id}}";
+    var current_member_fullname = "{{current_membership.get_full_name}}";
+    var getstream_key = "{{getstream_key}}";
+    var getstream_app_id = "{{getstream_app_id}}";
+  </script>
+</div>
+
+
+<div id="window-add-channel" style="display: none;">
+    <div>
+        <form method="post" enctype="multipart/form-data" class="create-channel-form"
+              action="{% acc_url 'discussion:add_channel' %}">
+            {% csrf_token %}
+            <ul class="fields-list">
+                {% include 'meetings/includes/edit_form.html' with form=channel_add_form %}
+            </ul>
+            <input type="submit" class="btn" value="{% trans 'Create' %}">
+        </form>
+    </div>
+</div>
+
+
+<div id="window-edit-channel" style="display: none;">
+    <div>
+        <form method="post" enctype="multipart/form-data" class="edit-channel-form"
+              action="">
+            {% csrf_token %}
+            <ul class="fields-list">
+                {% include 'meetings/includes/edit_form.html' with form=channel_edit_form %}
+            </ul>
+            <input type="submit" class="btn" value="{% trans 'Save' %}">
+        </form>
+    </div>
+</div>
+
+
+<div id="window-delete-channel" style="display: none;">
+    <p class="delete-message">{% trans 'Are you sure you want to permanently delete this discussion? This cannot be undone.' %}</p>
+    <div class="confirmation-buttons">
+      <button class="delete-confirm k-button">{% trans 'Yes' %}</button>
+      <button class="delete-cancel k-button">{% trans 'No' %}</button>
+    </div>
+</div>
+
+
+<div id="window-edit-message" style="display: none;">
+    <div>
+        <form method="post" enctype="multipart/form-data" class="edit-message-form"
+              action="">
+            {% csrf_token %}
+            <ul class="fields-list">
+                {% include 'meetings/includes/edit_form.html' with form=message_edit_form %}
+            </ul>
+            <input type="submit" class="btn" value="{% trans 'Save' %}">
+        </form>
+    </div>
+</div>
+
+{% endblock workspace %}

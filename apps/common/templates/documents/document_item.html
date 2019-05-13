@@ -1,0 +1,37 @@
+{% load i18n static %}
+
+<div class="document-item item {{ doc.extension }}{% if no_file_type %} no-file-type{% endif %}" id="item_{{ doc.id }}">
+  {% if edit_docs %}
+    <div class="document-item-downloadable">
+      <input type="checkbox" id="repeat-checkbox-{{ doc.id }}" data-doc-id="{{ doc.id }}" {% if doc.downloadable %}checked{% endif %} {% if doc.folder.meeting %}data-doc-meeting="{{ doc.folder.meeting.id }}"{% endif %}>
+      <label for="repeat-checkbox-{{ doc.id }}">{% trans 'Allow Document to be downloaded' %}</label>
+    </div>
+    {% spaceless %}
+      <div class="innerlinks">
+        <a href="#" class="sublinks"><i class="fa fa-pencil"></i>
+          <div class="dropdownlist">
+            <div><a class="edit-in-popup" href="#" title="Edit" data-doc-filename="{{ doc.name|default:doc.filename }}" data-doc-id="{{ doc.id }}" data-doc-type="{{ doc.type }}" {% if doc.folder.meeting %}data-doc-meeting="{{ doc.folder.meeting.id }}"{% endif %}><i class="fa fa-upload"></i>&nbsp; {% trans "Upload new version" %}</a></div>
+            <div><a class="rename-in-popup" href="#" title="Rename" data-doc-filename="{{ doc.name|default:doc.filename }}" data-doc-id="{{ doc.id }}" data-doc-type="{{ doc.type }}" {% if doc.folder.meeting %}data-doc-meeting="{{ doc.folder.meeting.id }}"{% endif %}><i class="fa fa-i-cursor"></i>&nbsp; {% trans "Rename" %}</a></div>
+          </div>
+        </a>
+        <a href="#" class="delete-doc-link" data-doc-id="{{ doc.id }}"><i class="fa fa-trash-o"></i></a>
+      </div>
+    {% endspaceless %}
+  {% endif %}
+    
+  <div class="title">
+    <h3>{{ doc.filename }}</h3>
+  </div>
+
+  {% if doc.folder.meeting %}
+    <h4>
+      {{ doc.folder.meeting.get_committee_name }}
+    </h4>
+  {% endif %}
+  <p>
+    <a href="{{ doc.get_download_url }}" data-doc-id="{{ doc.id }}" data-doc-type="{{ doc.type }}" {% if doc.folder.meeting %}data-doc-meeting="{{ doc.folder.meeting.id }}"{% endif %} class="download">{% trans 'Download' %}</a>
+    {% if doc.get_viewer_url %}
+      <a href="{{ doc.get_viewer_url }}" class="view" target="_blank">{% trans 'View' %}</a>
+    {% endif %}
+  </p>
+</div>

@@ -1,0 +1,28 @@
+{% extends "inner.html" %}
+{% load i18n two_factor %}
+
+{% block workspace %}
+<header class="heading">
+  <h1>{% block title %}{% trans "Disable Two-factor Authentication" %}{% endblock %}</h1>
+</header>
+  <div class='tfa fields'>
+  <p>You are about to disable two-factor authentication.</p>
+  <p>This compromises your account security, are you sure?</p>
+  <form method="post">
+    {% csrf_token %}
+    <ul class='tfa-fields-list'>
+      <li><label for="id_understand">Yes, I am sure</label>
+        <input type="checkbox" name="understand" required id="id_understand" /></li>
+    </ul>
+
+    <button class="btn btn-gray btn-asize" type="submit">{% trans "Disable" %}</button>
+
+    {% if current_membership %}
+    <a href="{% url 'profiles:edit' pk=current_membership.pk %}" class="btn btn-asize">
+        {% trans "Back to Profile" %}
+    </a>
+    {% endif %}
+
+  </form>
+</div>
+{% endblock %}

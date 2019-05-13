@@ -1,0 +1,106 @@
+{% extends "inner.html" %}
+{% load i18n common_tags user_tags permissions_tags %}
+{% load thumbnail %}
+{% load i18n static %}
+
+{% block base_resources %}
+  <link rel="stylesheet" href="{% static 'css.generated/base.css' %}"/>
+  <script src="{% static 'js/libs/jquery-1.12.4/jquery.min.js' %}"></script>
+{% endblock %}
+
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css.generated/committees.css' %}"/>
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/libs/momentjs/moment.js'|min_for_prod %}"></script>
+  <script src="{% static 'js/discussion.js' %}"></script>
+  <script src="{% static 'js/getstream.js' %}"></script>
+{% endblock extra_js %}
+
+{% block workspace %}
+  <header class="heading">
+    <div class="holder">
+      <h2>
+        {% trans 'Discussions' %}
+      </h2>
+    </div>
+  </header>
+  <div class="bar">
+    <form action="#" class="browse-by">
+      <label for="browse-by">{% trans 'Show' %}:</label>
+      <select name="" id="select_type_view_discussions">
+        <option value="">All discussions</option>
+        <option value="organization-block">{{ request.current_account.name }}</option>
+        <option value="users-block">Board members</option>
+        <option value="news-block">News</option>
+        <option value="committees-block">Committees</option>
+      </select>
+    </form>
+  </div>
+
+  <div id="committees">
+    <div class="committee organization-block show-discussion-block {% cycle '' 'committee-i' %}">
+      <div class="text">
+        <h3><a href="{{ request.current_account.get_path_to_discussion }}">{{ request.current_account.name }}</a></h3>
+        <p>{{ request.current_account.name }}</p>
+        <footer>
+          <a class="btn btn-primary" href="{{ request.current_account.get_path_to_discussion }}">{% trans 'View Discussion' %}</a>
+        </footer>
+      </div>
+      <dl class="info">
+                  <i class="fa fa-comments" aria-hidden="true"></i>
+      </dl>
+    </div>
+    {% for membership in active_members %}
+      <div class="committee users-block show-discussion-block {% cycle '' 'committee-i' %}">
+        <div class="text">
+          <h3><a href="{{ membership.get_path_to_discussion }}">{{ membership.get_full_name }}</a></h3>
+          <p>{{ membership.get_role_name }}</p>
+          <footer>
+            <a class="btn btn-primary" href="{{ membership.get_path_to_discussion }}">{% trans 'View Discussion' %}</a>
+          </footer>
+        </div>
+        <dl class="info">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+        </dl>
+      </div>
+    {% endfor %}
+    {% for news_rooms in active_news_rooms %}
+      <div class="committee news-block show-discussion-block {% cycle '' 'committee-i' %}">
+        <div class="text">
+          <h3><a href="{{ news_rooms.get_path_to_discussion }}">{{ news_rooms.title }}</a></h3>
+          <p>{{ news_rooms.created_member.get_full_name }}</p>
+          <footer>
+            <a class="btn btn-primary" href="{{ news_rooms.get_path_to_discussion }}">{% trans 'View Discussion' %}</a>
+          </footer>
+        </div>
+        <dl class="info">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+        </dl>
+      </div>
+    {% endfor %}
+    {% for committee_rooms in active_committee %}
+      <div class="committee committees-block show-discussion-block {% cycle '' 'committee-i' %}">
+        <div class="text">
+          <h3><a href="{{ committee_rooms.get_path_to_discussion }}">{{ committee_rooms.name }}</a></h3>
+          <p>{{ committee_rooms.summary }}</p>
+          <footer>
+            <a class="btn btn-primary" href="{{ committee_rooms.get_path_to_discussion }}">{% trans 'View Discussion' %}</a>
+            <dl>
+              <dt>{% trans 'Committee Members' %}:</dt>
+              <dd>
+                {% for user in committee_rooms.members %}
+                  <a href="{{ user.get_absolute_url }}">{{ user.get_full_name }}{% if user.is_chair %} ({% trans 'Chair' %}){% endif %}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </dd>
+            </dl>
+          </footer>
+        </div>
+        <dl class="info">
+                    <i class="fa fa-comments" aria-hidden="true"></i>
+        </dl>
+      </div>
+    {% endfor %}
+</div>
+{% endblock workspace %}
